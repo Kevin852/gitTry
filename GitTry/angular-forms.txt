@@ -1,0 +1,354 @@
+username: DN31
+
+password: 66025DN178831181
+
+PS NO: 10683272
+
+
+
+
+//add-employee.component.html
+<form [formGroup]="empForm" (ngSubmit)="InsertEmployee()">
+    <p>
+        <label for="empname">Employee Name:</label>
+        <input type="text" id="empname" name="empname" formControlName="empName">
+    </p>
+    <p>
+        <label for="empid"></label>
+        <input type="text" id="empid" formControlName="empId">
+        <span style="color:red;" *ngIf="empForm.controls.empId.invalid">*Required</span>
+    </p>
+    <p>
+        <label for="empemail"></label>
+        <input type="text" id="empemail" name="empemail" formControlName="empEmail">
+    </p>
+    <p>
+        <label for="empcity"></label>
+        <input type="text" id="empcity" name="empcity" formControlName="empCity">
+    </p>
+    <p>
+        <label for="empage"></label>
+        <input type="number" id="empage" name="empage" formControlName="empAge">
+    </p>
+
+    <p>
+        <button type="submit" [disabled]="empForm.invalid">Add Employee</button>
+    </p>
+</form>
+
+
+//add-employee component.ts
+import { Component, OnInit } from '@angular/core';
+import { AbstractControl, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { gt100 } from '../reactiveCustomValidator';
+
+@Component({
+  selector: 'app-add-employee',
+  templateUrl: './add-employee.component.html',
+  styleUrls: ['./add-employee.component.css']
+})
+export class AddEmployeeComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+
+  empForm=new FormGroup({
+    empName:new FormControl("",[Validators.required,Validators.pattern("^[a-zA-z]+$")]),
+    empId:new FormControl("0",[Validators.required,Validators.maxLength(6)]),
+    empEmail:new FormControl("",[Validators.required,Validators.email]),
+    empCity:new FormControl("",Validators.required),
+    empAge:new FormControl("",[Validators.required,gt100])
+  })
+
+InsertEmployee(){
+  console.log(this.empForm.value);
+}
+
+}
+
+//mycustomvalidator.ts
+import { Directive, Input } from '@angular/core';
+import {FormControl, NG_VALIDATORS, Validator} from '@angular/forms';
+
+@Directive({
+    selector: '[gt100]',
+    providers:[
+        {
+            provide:NG_VALIDATORS,useExisting:gt100ValidatorDirective,multi:true
+        }
+    ]
+})
+
+export class gt100ValidatorDirective implements Validator{
+
+
+validate(c:FormControl){
+
+let v:number=c.value;
+
+if(isNaN(v))
+{
+    return {'gt':true}
+}
+if(v>100)
+{
+    return{'gt':true}
+}
+return null;
+
+}
+
+}
+
+
+//reactivecustomvalidator.ts
+import { AbstractControl, ValidationErrors } from "@angular/forms";
+
+
+export function gt100(control:AbstractControl):ValidationErrors
+{
+
+    let v=control.value;
+
+    if(v>1000)
+    {
+    return {'gt100':true}
+    }
+    return {'gt':false};
+}
+//reactiveform.component.html
+<form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+    <p>
+        <label for="firstname">First Name:</label>
+        <input type="text" id="firstname" name="firstname" formControlName="firstname">
+    </p>
+    <p>
+        <label for="lastname">Last Name:</label>
+        <input type="text" id="lastname" name="lastname" formControlName="lastname">
+    </p>
+    <p>
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="email" formControlName="email">
+    </p>
+    <p>
+        <label for="country">Country:</label>
+       <select id="country" name="country" formControlName="country">
+           <option *ngFor="let c of countries">{{c}}</option>
+           
+           </select>
+
+    </p>
+    <p><button type="submit">Submit Contact</button></p>
+</form>
+
+//reactiveform.component.ts
+import { Component, OnInit } from '@angular/core';
+import {FormControl,FormGroup,Validators} from '@angular/forms';
+
+@Component({
+  selector: 'app-reactive-form',
+  templateUrl: './reactive-form.component.html',
+  styleUrls: ['./reactive-form.component.css']
+})
+export class ReactiveFormComponent implements OnInit {
+
+  countries=["USA","India","Australia","Germany","Canada"];
+
+  contactForm =new FormGroup({
+    firstname:new FormControl({value:'Archana',disabled:true}),
+    lastname:new FormControl("",[Validators.required,Validators.minLength(3)]),
+    email:new FormControl("",[Validators.required,Validators.email]),
+    country:new FormControl()
+  });
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+
+  onSubmit()
+  {
+    console.log(this.contactForm.get('email')?.value);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//register.component.html ==>template forms demo
+<form #signupForm="ngForm" (ngSubmit)="Register(signupForm)">
+<table>
+    <tr>
+        <td>
+            <label>First Name:</label>
+           
+        </td>
+        <td>
+<input type="text" name="fname" [ngModel]="user.fName" required minlength="3" pattern="^[a-zA-Z0-9]+$" #fname="ngModel">
+<div class="error" *ngIf="fname.invalid && (fname.touched&&!fname.dirty)">FirstName is required</div>
+<div class="error" *ngIf="fname.invalid && (fname.touched&&fname.dirty)">Name can just be characters and minimum 3 chars</div>
+
+        </td> 
+      
+    </tr>
+    <tr>
+        <td>
+            <label>Last Name:</label>
+
+        </td>
+        <td>
+            <input type="text" name="lname" [ngModel]="user.lName" maxlength="5" #lName="ngModel">
+            <span *ngIf="lName.invalid">Last Name can have max of 5 characters </span> 
+        </td>
+    </tr>
+    <tr>
+        <td>
+<label>Email:</label>
+        </td>
+        <td>
+            <input type="text" name="email" [ngModel]="user.email" #email="ngModel" required email>
+            <span *ngIf="email.invalid&&(email.touched&&email.dirty)">Invalid Email</span>
+            <span *ngIf="email.invalid && (email.touched&&!email.dirty)">Email is required</span>
+        </td>
+    </tr>
+    <tr>
+        <td>
+<label>Gender:</label>
+        </td>
+        <td>
+            <input type="radio" name="gender" [ngModel]="user.gender" #gender="ngModel" required value="Male">Male
+            <input type="radio" name="gender" [ngModel]="user.gender" #gender="ngModel" required value="Female">Female
+            <span *ngIf="gender.invalid && gender.touched">Gender is required</span>
+        </td>
+    </tr>
+    <tr>
+        <td>
+<label></label>
+        </td>
+        <td>
+         <input type="checkbox" name="uType" [ngModel]="user.uType" #uType="ngModel">   
+         <input type="checkbox" name="uType" [ngModel]="user.uType" #uType="ngModel">   
+        </td>
+    </tr>
+    
+    <tr>
+        <td>
+UserId:        </td>
+        <td>
+            <input type="text" name="userId" ngModel #userId="ngModel" userNameValidator >
+        </td>
+    </tr>
+    <tr>
+        <td>Password:</td>
+        <td><input type="text" name="pass" [ngModel]="user.pass" #pass="ngModel"></td>
+    </tr>
+    <tr>
+        <td>Retype Password:</td>
+        <td><input type="text" name="r_pass" [ngModel]="user.r_pass" #r_pass="ngModel" compare></td>
+    </tr>
+    <tr>
+        <td>
+<input type="submit" value="Register" [disabled]="!signupForm.valid">
+        </td>
+        <td>
+            <input type="reset" value="Clear">
+        </td>
+    </tr>
+</table>
+
+</form>
+
+//register.component.ts
+import { Component, OnInit } from '@angular/core';
+import { NgForm } from '@angular/forms';
+
+@Component({
+  selector: 'app-register',
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.css']
+})
+export class RegisterComponent implements OnInit {
+   
+  user=new user();
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+
+  Register(form:NgForm)
+  {
+
+  this.user=form.value;
+  console.log(this.user);
+  form.value.email="";
+form.resetForm();
+
+  }
+}
+
+export class user{
+  fName:string="";
+  lName:string="";
+  email:string="";
+  gender:string="";
+  uType:string="";
+  pass:string="";
+  r_pass:string="";
+  
+}
+
+//custom compare validator
+
+import { Input } from '@angular/core';
+import { Directive } from '@angular/core';
+import { AbstractControl, FormControl, FormGroup, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
+
+@Directive({
+  selector: '[compare]',
+  providers:[
+    {provide:NG_VALIDATORS,useExisting:CusCompareValidatorDirective,multi:true}
+  ]
+})
+export class CusCompareValidatorDirective implements Validator {
+ 
+ 
+
+  validate(c:AbstractControl):ValidationErrors|null
+  {
+   
+    //retype password
+    let controlvalue:string=c.value;
+
+    //password
+   let comparevalue:string=c.root.get("pass")?.value;
+   //comparing both
+   if(!(controlvalue==comparevalue))
+   {
+    return {'compare':true}
+   }
+return null;
+  }
+
+
+}
+//Creating a custom validator
+//1. Create a directive
+//2. make the directive class Implement the interface 'Validator'
+//3. implement the validate function
+//4. Inside the validate function, write the logic
+//5. Register the customer validator in the provider section
+//6. On the form control use the validator attribute ( selector )
